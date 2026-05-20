@@ -1,0 +1,32 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# Node modules
+node_modules/
+
+# Local configuration and credentials
+.env
+local_settings.py
+
+# Databases
+*.sqlite3
+db.sqlite3
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Serverless
+.serverless/
+
+# OS files
+.DS_Store
+Thumbs.db

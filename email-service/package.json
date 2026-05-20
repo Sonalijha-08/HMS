@@ -1,0 +1,14 @@
+{
+  "name": "hms-email-service",
+  "version": "1.0.0",
+  "description": "Offline serverless email notification service for HMS",
+  "main": "handler.js",
+  "scripts": {
+    "start": "serverless offline"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.3"
+  }
+}

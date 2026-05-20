@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}HMS - Create an Account{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="glass-panel">
+        <h2 style="font-size: 1.8rem; font-weight: 700; text-align: center; margin-bottom: 25px;">Create an Account</h2>
+        
+        <form method="POST" id="signup-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.username.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.email.id_for_label }}">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.email.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label class="form-label" for="{{ form.first_name.id_for_label }}">First Name</label>
+                    {{ form.first_name }}
+                </div>
+                <div>
+                    <label class="form-label" for="{{ form.last_name.id_for_label }}">Last Name</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Select Your Role</label>
+                <div style="display: flex; gap: 30px; padding: 10px 0;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="role" value="patient" checked class="role-radio" id="role-patient-btn">
+                        <span>Patient</span>
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="role" value="doctor" class="role-radio" id="role-doctor-btn">
+                        <span>Doctor</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Dynamic Doctor Specialization field -->
+            <div class="form-group" id="doctor-fields" style="display: none;">
+                <label class="form-label" for="{{ form.specialization.id_for_label }}">Medical Specialization</label>
+                {{ form.specialization }}
+                {% if form.specialization.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.specialization.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Dynamic Patient DOB field -->
+            <div class="form-group" id="patient-fields">
+                <label class="form-label" for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                {{ form.date_of_birth }}
+                {% if form.date_of_birth.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.date_of_birth.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_password">Password</label>
+                <input type="password" name="password" id="id_password" class="form-input" placeholder="Enter your password" required>
+                {% if form.password.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.password.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_confirm_password">Confirm Password</label>
+                <input type="password" name="confirm_password" id="id_confirm_password" class="form-input" placeholder="Confirm your password" required>
+                {% if form.confirm_password.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.confirm_password.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 12px;">Create Account</button>
+        </form>
+
+        <p style="text-align: center; color: var(--text-muted); margin-top: 20px; font-size: 0.9rem;">
+            Already have an account? <a href="{% url 'login' %}" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">Log In</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    // Responsive Form Toggles for Sign Up Role Selection
+    const patientRadio = document.getElementById('role-patient-btn');
+    const doctorRadio = document.getElementById('role-doctor-btn');
+    const doctorFields = document.getElementById('doctor-fields');
+    const patientFields = document.getElementById('patient-fields');
+
+    function updateFormFields() {
+        if (doctorRadio.checked) {
+            doctorFields.style.display = 'block';
+            patientFields.style.display = 'none';
+        } else {
+            doctorFields.style.display = 'none';
+            patientFields.style.display = 'block';
+        }
+    }
+
+    patientRadio.addEventListener('change', updateFormFields);
+    doctorRadio.addEventListener('change', updateFormFields);
+    
+    // Auto-detect role parameter from URL if provided (e.g. ?role=doctor)
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
+    if (roleParam === 'doctor') {
+        doctorRadio.checked = true;
+        updateFormFields();
+    } else if (roleParam === 'patient') {
+        patientRadio.checked = true;
+        updateFormFields();
+    }
+</script>
+{% endblock %}

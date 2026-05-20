@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}HMS - Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-title">
+    <div>
+        <h2>Doctor Dashboard</h2>
+        <p style="color: var(--text-muted);">Manage your availability slots and view patient bookings.</p>
+    </div>
+    
+    <!-- Google Calendar Connection Status -->
+    <div class="sync-card">
+        <div class="sync-status">
+            <span class="status-dot {% if has_calendar %}active{% else %}inactive{% endif %}"></span>
+            <div>
+                <h5 style="font-weight: 600;">Google Calendar</h5>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">
+                    {% if has_calendar %}Connected & Syncing{% else %}Not Connected{% endif %}
+                </p>
+            </div>
+        </div>
+        {% if not has_calendar %}
+            <a href="{% url 'google_auth_init' %}" class="btn btn-primary btn-small" style="margin-left: 15px;">Link Account</a>
+        {% else %}
+            <span style="color: var(--success); font-size: 0.85rem; font-weight: 600; margin-left: 15px;">Linked!</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Left Column: Add Availability Slot -->
+    <div>
+        <div class="glass-panel">
+            <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Publish Slot
+            </h3>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger" style="padding: 10px 15px; font-size: 0.85rem;">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="id_slot_date">Date</label>
+                    {{ form.slot_date }}
+                </div>
+                
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label class="form-label" for="id_start_time">Start Time</label>
+                        {{ form.start_time }}
+                    </div>
+                    <div>
+                        <label class="form-label" for="id_end_time">End Time</label>
+                        {{ form.end_time }}
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Create Slot</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Right Column: List of slots -->
+    <div>
+        <div class="glass-panel" style="min-height: 400px;">
+            <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 20px;">Your Schedule & Availability</h3>
+            
+            {% if slots %}
+                <div class="slot-list">
+                    {% for slot in slots %}
+                        <div class="item-card {% if slot.is_booked %}item-card-booked{% endif %}">
+                            <div class="item-info">
+                                <h4>{{ slot.start_time|date:"F j, Y" }}</h4>
+                                <p style="font-size: 0.95rem; font-weight: 500; color: #fff; margin-top: 2px;">
+                                    {{ slot.start_time|date:"H:i" }} - {{ slot.end_time|date:"H:i" }} UTC
+                                </p>
+                                
+                                {% if slot.is_booked %}
+                                    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+                                        <span class="user-badge badge-patient" style="align-self: flex-start; padding: 2px 8px; font-size: 0.7rem;">
+                                            Booked
+                                        </span>
+                                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">
+                                            <strong>Patient:</strong> {{ slot.booking.patient.username }} ({{ slot.booking.patient.email }})
+                                        </p>
+                                        {% if slot.booking.google_event_id_doctor %}
+                                            <p style="color: var(--success); font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Synced to Google Calendar
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="user-badge badge-doctor" style="align-self: flex-start; padding: 2px 8px; font-size: 0.7rem; margin-top: 8px; display: inline-block;">
+                                        Available
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; opacity: 0.5;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p>No availability slots published yet.</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Use the slot publisher to create slots for patients to book.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

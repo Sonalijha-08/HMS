@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}HMS - Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-title">
+    <div>
+        <h2>Patient Dashboard</h2>
+        <p style="color: var(--text-muted);">Find a doctor and book appointment slots.</p>
+    </div>
+    
+    <!-- Google Calendar Connection Status -->
+    <div class="sync-card">
+        <div class="sync-status">
+            <span class="status-dot {% if has_calendar %}active{% else %}inactive{% endif %}"></span>
+            <div>
+                <h5 style="font-weight: 600;">Google Calendar</h5>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">
+                    {% if has_calendar %}Connected & Syncing{% else %}Not Connected{% endif %}
+                </p>
+            </div>
+        </div>
+        {% if not has_calendar %}
+            <a href="{% url 'google_auth_init' %}" class="btn btn-primary btn-small" style="margin-left: 15px;">Link Account</a>
+        {% else %}
+            <span style="color: var(--success); font-size: 0.85rem; font-weight: 600; margin-left: 15px;">Linked!</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Left Column: Browse Doctors & Slots -->
+    <div>
+        <div class="glass-panel">
+            <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 20px;">Browse Available Doctors</h3>
+            
+            {% if doctors %}
+                <div class="doctor-selection-grid">
+                    {% for doc in doctors %}
+                        <a href="?doctor_id={{ doc.id }}" class="doctor-card {% if selected_doctor.id == doc.id %}active{% endif %}" style="text-decoration: none; color: inherit; display: block;">
+                            <div style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; border: 1px solid var(--glass-border);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                            <h4 style="font-size: 0.95rem; font-weight: 600;">Dr. {{ doc.username }}</h4>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                                {{ doc.doctor_profile.specialization|default:"General Medicine" }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: var(--text-muted); text-align: center;">No doctors registered in the system yet.</p>
+            {% endif %}
+            
+            <!-- Slots for Selected Doctor -->
+            {% if selected_doctor %}
+                <div style="border-top: 1px solid var(--glass-border); margin-top: 25px; padding-top: 25px;">
+                    <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                        Available Slots for <span style="color: var(--accent-cyan);">Dr. {{ selected_doctor.username }}</span>
+                    </h4>
+                    
+                    {% if available_slots %}
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">
+                            Click a time slot card below to make an instant booking.
+                        </p>
+                        <div class="slots-grid">
+                            {% for slot in available_slots %}
+                                <a href="{% url 'book_appointment' slot.id %}" class="slot-btn" onclick="return confirm('Do you want to book this appointment slot: {{ slot.start_time|date:\'M d, Y H:i\' }} UTC?');">
+                                    <div style="font-weight: 600; font-size: 0.9rem;">
+                                        {{ slot.start_time|date:"M d" }}
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--accent-blue); margin-top: 4px; font-weight: 700;">
+                                        {{ slot.start_time|date:"H:i" }} - {{ slot.end_time|date:"H:i" }}
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">
+                                        UTC
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="color: var(--text-muted); font-size: 0.9rem; padding: 20px 0;">
+                            Dr. {{ selected_doctor.username }} has no available future slots published right now.
+                        </p>
+                    {% endif %}
+                </div>
+            {% else %}
+                {% if doctors %}
+                    <div style="border-top: 1px solid var(--glass-border); margin-top: 25px; padding-top: 25px; text-align: center; color: var(--text-muted); padding-bottom: 15px;">
+                        <p>Select a doctor card above to view and book their available time slots.</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Right Column: Scheduled Bookings -->
+    <div>
+        <div class="glass-panel" style="min-height: 400px;">
+            <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 20px;">Your Scheduled Appointments</h3>
+            
+            {% if bookings %}
+                <div class="booking-list">
+                    {% for booking in bookings %}
+                        <div class="item-card" style="border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.03);">
+                            <div class="item-info">
+                                <h4 style="color: #fff;">Dr. {{ booking.slot.doctor.username }}</h4>
+                                <p style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600; text-transform: uppercase; margin-top: 2px;">
+                                    {{ booking.slot.doctor.doctor_profile.specialization|default:"General Medicine" }}
+                                </p>
+                                
+                                <div style="margin-top: 10px;">
+                                    <p style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">
+                                        {{ booking.slot.start_time|date:"F j, Y" }}
+                                    </p>
+                                    <p style="font-size: 0.8rem; color: var(--text-muted);">
+                                        {{ booking.slot.start_time|date:"H:i" }} - {{ booking.slot.end_time|date:"H:i" }} UTC
+                                    </p>
+                                </div>
+                                
+                                {% if booking.google_event_id_patient %}
+                                    <p style="color: var(--success); font-size: 0.75rem; display: flex; align-items: center; gap: 4px; margin-top: 8px; font-weight: 600;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Synced to Google Calendar
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; opacity: 0.5;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <p>No appointments booked yet.</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Select a doctor and click an available time slot to schedule your first visit.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

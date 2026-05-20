@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}HMS - Welcome to Hospital Management System{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Smart Hospital Management,<br><span style="background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Direct Availability Sync</span></h1>
+    <p>Book instant appointments with expert doctors, manage availability slots, and automatically sync schedules to your Google Calendar.</p>
+    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+        <a href="{% url 'signup' %}" class="btn btn-primary">Get Started Now</a>
+        <a href="{% url 'login' %}" class="btn btn-secondary">Access Portal</a>
+    </div>
+</section>
+
+<div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; margin-top: 20px;">
+    <div class="glass-panel" style="text-align: center;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        </div>
+        <h3 style="font-size: 1.5rem; margin-bottom: 12px;">For Patients</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem;">Browse available doctors, view real-time availability slots, and book your appointments instantly with race-condition prevention.</p>
+        <a href="{% url 'signup' %}?role=patient" class="btn btn-secondary btn-small">Register as Patient</a>
+    </div>
+
+    <div class="glass-panel" style="text-align: center;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.8 15h14.4M12 4.8v14.4"/>
+            </svg>
+        </div>
+        <h3 style="font-size: 1.5rem; margin-bottom: 12px;">For Doctors</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem;">Easily publish your available date and time slots, keep your schedule organized, and sync directly with Google Calendar.</p>
+        <a href="{% url 'signup' %}?role=doctor" class="btn btn-secondary btn-small">Register as Doctor</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}HMS - Log In{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="glass-panel">
+        <h2 style="font-size: 1.8rem; font-weight: 700; text-align: center; margin-bottom: 25px;">Welcome Back</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" name="username" id="username" class="form-input" placeholder="Enter your username" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" name="password" id="password" class="form-input" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 12px;">Log In</button>
+        </form>
+
+        <p style="text-align: center; color: var(--text-muted); margin-top: 20px; font-size: 0.9rem;">
+            Don't have an account yet? <a href="{% url 'signup' %}" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">Sign Up</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
