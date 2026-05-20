@@ -68,7 +68,7 @@
                         </p>
                         <div class="slots-grid">
                             {% for slot in available_slots %}
-                                <a href="{% url 'book_appointment' slot.id %}" class="slot-btn" onclick="return confirm('Do you want to book this appointment slot: {{ slot.start_time|date:\'M d, Y H:i\' }} UTC?');">
+                                <a href="{% url 'book_appointment' slot.id %}" class="slot-btn" onclick="return confirm('Do you want to book this appointment slot: {{ slot.start_time|date:"M d, Y H:i" }} UTC?');">
                                     <div style="font-weight: 600; font-size: 0.9rem;">
                                         {{ slot.start_time|date:"M d" }}
                                     </div>
